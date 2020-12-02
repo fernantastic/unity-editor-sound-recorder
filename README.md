@@ -4,6 +4,10 @@ This is a snippet for recording microphone audio in the Unity Editor, extracted 
 
 No warranties, not sure it still works!
 
+## Requirements 
+SavWav
+https://gist.github.com/darktable/2317063
+
 
 ## Usage
 
