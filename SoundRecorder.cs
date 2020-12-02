@@ -91,15 +91,15 @@ internal class SoundRecorder {
 			int startSample = Mathf.FloorToInt(startTime * clip.samples);
 			//Debug.Log("Play at " + startTime + " sample " + startSample);
 			if (reversed) startSample = Mathf.Abs(startSample - clip.samples);
-			EditorUtils.InvokeMethod(typeof(AudioImporter), "UnityEditor.AudioUtil", "PlayClip",
+			InvokeMethod(typeof(AudioImporter), "UnityEditor.AudioUtil", "PlayClip",
 				new System.Type[]{typeof(AudioClip), typeof(int)}, new object[]{clip, startSample});
 		}
 		internal void StopPreview() {
 			if (!HasRecording()) {
 				return;
 			}
-			EditorUtils.InvokeMethod(typeof(AudioImporter), "UnityEditor.AudioUtil", "StopClip", typeof(AudioClip), m_Clip);
-			EditorUtils.InvokeMethod(typeof(AudioImporter), "UnityEditor.AudioUtil", "StopClip", typeof(AudioClip), m_ClipReversed);
+			InvokeMethod(typeof(AudioImporter), "UnityEditor.AudioUtil", "StopClip", typeof(AudioClip), m_Clip);
+			InvokeMethod(typeof(AudioImporter), "UnityEditor.AudioUtil", "StopClip", typeof(AudioClip), m_ClipReversed);
 			m_Playing = false;
 		}
 
@@ -118,6 +118,22 @@ internal class SoundRecorder {
 			m_SavedGUID = AssetDatabase.AssetPathToGUID(assetPath);
 		}
 		
+	}
+	
+	///
+	/// Call a method that's not available
+	///  eg. InvokeMethod(typeof(AudioImporter), "UnityEditor.AudioUtil", "PlayClip", ...)
+	/// https://forum.unity3d.com/threads/way-to-play-audio-in-editor-using-an-editor-script.132042/
+	internal static object InvokeMethod(System.Type assemblyType, string className, string methodName, System.Type[] parameterTypes, object[] parameters) {
+		Assembly unityEditorAssembly = assemblyType.Assembly;
+		System.Type audioUtilClass = unityEditorAssembly.GetType(className);
+		MethodInfo method = audioUtilClass.GetMethod(methodName, 
+			BindingFlags.Static | BindingFlags.Public, null, parameterTypes, null);
+		return method.Invoke(null, parameters);
+	}
+	
+	internal static object InvokeMethod(System.Type assemblyType, string className, string methodName, System.Type parameterType, object parameter) {
+		return InvokeMethod(assemblyType, className, methodName, new System.Type[]{parameterType}, new object[]{parameter});
 	}
 
 	static private List<Sound> m_Sounds;
